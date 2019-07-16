@@ -1,0 +1,5 @@
+docker run -d --name php --network lnmp  -v /home/yjclove/docker:/var/www/html  -v /home/yjclove/docker/phpconfig:/usr/local/etc php:7.3-fpm-strenth
+
+docker run --name nginx --network lnmp -d -p 80:80  -v /home/yjclove/docker:/var/www/html  -v /home/yjclove/docker/nginxconf:/etc/nginx  nginx
+
+docker run --name mysql --network lnmp  -p 3306:3306  -e MYSQL_ROOT_PASSWORD=yjcadmin -d mysql:5.7 --character-set-server=utf8mb4
