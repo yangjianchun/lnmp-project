@@ -1,4 +1,4 @@
-docker run -d --name php --network lnmp  -v /home/yjclove/docker:/var/www/html  -v /home/yjclove/docker/phpconfig:/usr/local/etc php:7.3-fpm-strenth
+docker run -d --name php --network lnmp  -v /home/yjclove/docker:/var/www/html  -v /home/yjclove/docker/phpconfig:/usr/local/etc php:7.3-fpm-stretch
 
 docker run --name nginx --network lnmp -d -p 80:80  -v /home/yjclove/docker:/var/www/html  -v /home/yjclove/docker/nginxconf:/etc/nginx  nginx
 
