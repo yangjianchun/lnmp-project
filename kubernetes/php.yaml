@@ -1,0 +1,255 @@
+metadata:
+  name: phpconfig
+  selfLink: /api/v1/persistentvolumes/phpconfig
+  uid: 32bd6108-c523-417b-a8d7-b9006ff3faa9
+  resourceVersion: '153647'
+  creationTimestamp: '2019-08-04T10:39:06Z'
+  labels:
+    lnmp: phpconfig
+  annotations:
+    pv.kubernetes.io/bound-by-controller: 'yes'
+  finalizers:
+    - kubernetes.io/pv-protection
+spec:
+  capacity:
+    storage: 1Gi
+  nfs:
+    server: 192.168.1.102
+    path: /nfs/data/lnmp/lnmp-project/phpconfig
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    kind: PersistentVolumeClaim
+    namespace: lnmp
+    name: lnmp-phpconfig
+    uid: fd598b73-1573-473d-b49b-f57fd98704c8
+    apiVersion: v1
+    resourceVersion: '153330'
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  volumeMode: Filesystem
+status:
+  phase: Bound
+
+ ---
+
+ metadata:
+  name: phpproject
+  selfLink: /api/v1/persistentvolumes/phpproject
+  uid: 904a023a-a4f0-4f20-9954-62df70170163
+  resourceVersion: '154144'
+  creationTimestamp: '2019-08-04T10:41:45Z'
+  labels:
+    lnmp: phpproject
+  annotations:
+    pv.kubernetes.io/bound-by-controller: 'yes'
+  finalizers:
+    - kubernetes.io/pv-protection
+spec:
+  capacity:
+    storage: 1Gi
+  nfs:
+    server: 192.168.1.102
+    path: /nfs/data/lnmp/project
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    kind: PersistentVolumeClaim
+    namespace: lnmp
+    name: lnmp-phpproject
+    uid: 722c0caf-3566-4153-97cb-784c186e666f
+    apiVersion: v1
+    resourceVersion: '154142'
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  volumeMode: Filesystem
+status:
+  phase: Bound
+
+
+  ---
+
+
+ kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: lnmp-phpconfig
+  namespace: lnmp
+  selfLink: /api/v1/namespaces/lnmp/persistentvolumeclaims/lnmp-phpconfig
+  uid: fd598b73-1573-473d-b49b-f57fd98704c8
+  resourceVersion: '153649'
+  creationTimestamp: '2019-08-04T10:35:42Z'
+  labels:
+    app: lnmp-phpconfig
+    wayne-app: lnmp
+    wayne-ns: lnmp
+  annotations:
+    pv.kubernetes.io/bind-completed: 'yes'
+    pv.kubernetes.io/bound-by-controller: 'yes'
+  finalizers:
+    - kubernetes.io/pvc-protection
+spec:
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      lnmp: phpconfig
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: phpconfig
+  storageClassName: nfs
+  volumeMode: Filesystem
+status:
+  phase: Bound
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+
+    ---
+
+   kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: lnmp-phpproject
+  namespace: lnmp
+  selfLink: /api/v1/namespaces/lnmp/persistentvolumeclaims/lnmp-phpproject
+  uid: 722c0caf-3566-4153-97cb-784c186e666f
+  resourceVersion: '154146'
+  creationTimestamp: '2019-08-04T10:44:37Z'
+  labels:
+    app: lnmp-phpproject
+  annotations:
+    pv.kubernetes.io/bind-completed: 'yes'
+    pv.kubernetes.io/bound-by-controller: 'yes'
+  finalizers:
+    - kubernetes.io/pvc-protection
+spec:
+  accessModes:
+    - ReadWriteMany
+  selector:
+    matchLabels:
+      lnmp: phpproject
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: phpproject
+  storageClassName: nfs
+  volumeMode: Filesystem
+status:
+  phase: Bound
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+kind: Service
+apiVersion: v1
+metadata:
+  name: lnmp-php
+  namespace: lnmp
+  selfLink: /api/v1/namespaces/lnmp/services/lnmp-php
+  uid: a132abe9-f688-4b84-8849-d3c533bb38f9
+  resourceVersion: '255045'
+  creationTimestamp: '2019-08-07T10:20:42Z'
+  labels:
+    app: lnmp-php
+    wayne-app: lnmp
+    wayne-ns: lnmp
+spec:
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: php
+  clusterIP: 10.99.182.94
+  type: ClusterIP
+  sessionAffinity: None
+status:
+  loadBalancer: {}
+
+  ---
+  kind: Deployment
+apiVersion: apps/v1beta1
+metadata:
+  name: lnmp-php
+  namespace: lnmp
+  selfLink: /apis/apps/v1beta1/namespaces/lnmp/deployments/lnmp-php
+  uid: 1d84fee0-051d-4276-adde-6d0701079d2c
+  resourceVersion: '255802'
+  generation: 2
+  creationTimestamp: '2019-08-07T10:18:32Z'
+  labels:
+    app: php
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: php
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: php
+      annotations:
+        wayne.cloud/controller-kind: deployment
+    spec:
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: lnmp-phpconfig
+        - name: project
+          persistentVolumeClaim:
+            claimName: lnmp-phpproject
+      containers:
+        - name: php
+          image: 'yjc-php-new:7.3'
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: config
+              mountPath: /usr/local/etc
+            - name: project
+              mountPath: /var/www/html
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 20%
+  revisionHistoryLimit: 2
+  progressDeadlineSeconds: 600
+status:
+  observedGeneration: 2
+  replicas: 2
+  updatedReplicas: 2
+  readyReplicas: 2
+  availableReplicas: 2
+  conditions:
+    - type: Available
+      status: 'True'
+      lastUpdateTime: '2019-08-07T10:18:32Z'
+      lastTransitionTime: '2019-08-07T10:18:32Z'
+      reason: MinimumReplicasAvailable
+      message: Deployment has minimum availability.
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2019-08-07T10:18:35Z'
+      lastTransitionTime: '2019-08-07T10:18:32Z'
+      reason: NewReplicaSetAvailable
+      message: ReplicaSet "lnmp-php-75c554b888" has successfully progressed.
+
